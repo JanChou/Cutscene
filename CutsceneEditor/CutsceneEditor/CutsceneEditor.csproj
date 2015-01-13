@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FD7D0DD3-55CC-48AC-A5C9-1210D7695D1A}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CutsceneEditor</RootNamespace>
+    <AssemblyName>CutsceneEditor</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEditor">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Unity\Editor\Data\Managed\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Unity\Editor\Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CutsceneEditor\Components\Actions\Action_AudioProperties.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_FollowCurve.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_ParticleProperties.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_PlayAnimation.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_Rotator.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_ScreenFade.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_SetMaterialColor.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_SetMaterialFloat.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_SetMaterialVector.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_SetPosition.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Action_SetRotation.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Editor\Action_FollowCurve_Editor.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Editor\Action_PlayAnimation_Editor.cs" />
+    <Compile Include="CutsceneEditor\Components\Actions\Editor\CutsceneActionEditor.cs" />
+    <Compile Include="CutsceneEditor\Curves\Curve.cs" />
+    <Compile Include="CutsceneEditor\Curves\CurvePoint.cs" />
+    <Compile Include="CutsceneEditor\CutScene\Attributes\CutsceneActionAttribute.cs" />
+    <Compile Include="CutsceneEditor\CutScene\Attributes\CutsceneEventExcludeAttribute.cs" />
+    <Compile Include="CutsceneEditor\CutScene\Attributes\CutsceneEventOverrideNameAttribute.cs" />
+    <Compile Include="CutsceneEditor\CutScene\CurveClip.cs" />
+    <Compile Include="CutsceneEditor\CutScene\CurveClipCustomProperty.cs" />
+    <Compile Include="CutsceneEditor\CutScene\CurveClipKey.cs" />
+    <Compile Include="CutsceneEditor\CutScene\Cutscene.cs" />
+    <Compile Include="CutsceneEditor\Misc\Target.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Gizmos\Aperture_CurvePoint.tiff" />
+    <Content Include="Gizmos\Aperture_Target.tiff" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
