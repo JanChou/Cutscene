@@ -7,7 +7,7 @@
 [CutsceneEventOverrideNameAttribute("Set Rotation")]
 
 class Action_SetRotation : CutsceneAction {
-	Vector3 rotation;
+	public Vector3 rotation;
 	
 	[CutsceneEventExclude()]
 	public void Update() {

@@ -70,11 +70,27 @@
     <Compile Include="CutsceneEditor\CutScene\CurveClipCustomProperty.cs" />
     <Compile Include="CutsceneEditor\CutScene\CurveClipKey.cs" />
     <Compile Include="CutsceneEditor\CutScene\Cutscene.cs" />
+    <Compile Include="CutsceneEditor\CutScene\CutsceneAction.cs" />
+    <Compile Include="CutsceneEditor\CutScene\CutsceneEvent.cs" />
+    <Compile Include="CutsceneEditor\CutScene\CutsceneEventClip.cs" />
+    <Compile Include="CutsceneEditor\CutScene\CutsceneEventInfo.cs" />
+    <Compile Include="CutsceneEditor\CutScene\Editor\CutsceneEditor.cs" />
+    <Compile Include="CutsceneEditor\CutScene\EventClip.cs" />
+    <Compile Include="CutsceneEditor\CutScene\EventParam.cs" />
     <Compile Include="CutsceneEditor\Misc\Target.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Skins\CutsceneEditorSkin.guiskin" />
+    <None Include="Textures\ClipMoveDown.psd" />
+    <None Include="Textures\ClipMoveUp.psd" />
+    <None Include="Textures\CurveClip.psd" />
+    <None Include="Textures\CurveClipMouseOver.psd" />
+    <None Include="Textures\Key.psd" />
+    <None Include="Textures\KeyMouseOver.psd" />
+    <None Include="Textures\PreviewButton.psd" />
+    <None Include="Textures\TimeMarkerArrow.psd" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -24,7 +24,7 @@ public class Cutscene : MonoBehaviour
     [HideInInspector]
     public List<CurveClip> finishedCurves = new List<CurveClip>();
     [HideInInspector]
-    public List<Eventclip> finishedEvents = new List<Eventclip>();
+    public List<EventClip> finishedEvents = new List<EventClip>();
     [HideInInspector]
     public List<CutsceneEventClip> finishedCutsceneEvents = new List<CutsceneEventClip>();
     [HideInInspector]
@@ -35,10 +35,10 @@ public class Cutscene : MonoBehaviour
     public static List<Camera> cameraCache = new List<Camera>();
 
 
-    public List<string> functionNames = new List<string>();
-    public List<CurveClip> currentStaticClips = new List<CurveClip>();
-    public List<float> currentValues = new List<float>();
-    public List<bool> timeIsOverClipValues = new List<bool>();
+    public static List<string> functionNames = new List<string>();
+    public static List<CurveClip> currentStaticClips = new List<CurveClip>();
+    public static List<float> currentValues = new List<float>();
+    public static List<bool> timeIsOverClipValues = new List<bool>();
     public static bool timeIsOverCurrentClip = false;
 
 
@@ -143,153 +143,189 @@ public class Cutscene : MonoBehaviour
     }
 
     [CutsceneEventExclude()]
-    public void UpdateCutscene(float time, bool triggerEvents, bool onlyOverClip) {
-	List<CurveClip> currentClips = new List<CurveClip>();
-	float totalTime = GetTotalTime();
-	currentClips = curves.ToList<CurveClip>();
-	
-	functionNames = new List<string>();
-	currentStaticClips = new List<CurveClip>();
-	currentValues = new List<float>();
-	timeIsOverClipValues = new List<bool>();
-	
-	time = Mathf.Max(0,time);
-	time = Mathf.Min(totalTime,time);
-	if (time > totalTime) {
-		Debug.Log("time > GetTotalTime()");
-	}
-	for (int i = 0; i < currentClips.Count; i++) {
-		var currentClip = currentClips[i] as CurveClip;
-		if (currentClip==null) continue;
-		
-		var isTimeOverClip = false;
-		if (time >= currentClip.startTime && time < currentClip.startTime+currentClip.length) {
-			isTimeOverClip = true;
-		}
-		
-		//if (time > GetTotalTime() && currentClip.startTime+currentClip.length == GetTotalTime()) {
-		//	isTimeOverClip = true;
-		//}
-		
-		if (onlyOverClip && !isTimeOverClip) continue;
-		
-		//if (Application.isPlaying) {
-		if (currentClip.activeCamera) {
-			if (isTimeOverClip) {
-				SetOverrideCameraState(currentClip,true);
-			}
-			else {
-				SetOverrideCameraState(currentClip,false);
-			}
-		}
-		//}
-		
-		var relativeClipTime = (time)-currentClip.startTime;
-		var currentValue = currentClip.GetValue(relativeClipTime);
-		//evalValue = value;
-		
-		if (currentClip.target) {
-			if (!isTimeOverClip) {
-				if (currentClip.activeCalculateOnly) {
-					continue;
-				}
-			}
-			//evalObjectScope = currentClip.target;
-			if (currentClip.updateMode == CutsceneClipUpdateMode.Disable) {
-				continue;
-			}
-			if (currentClip.updateMode == CutsceneClipUpdateMode.Action) {
-				if (currentClip.updateEvent == "No Valid Events Found") {
-					continue;
-				}
-				
-				if (currentClip.targetAction && isTimeOverClip) {
-					currentClip.targetAction.OnTimeOverCurveClip(currentClip);
-				}
-				var fName = currentClip.updateEvent;
-				if (!Application.isPlaying) {
-					if (onlyOverClip || currentClip.lastValue != currentValue) {
-						functionNames.Add(fName);
-						currentStaticClips.Add(currentClip);
-						currentValues.Add(currentValue);
-						timeIsOverClipValues.Add(isTimeOverClip);
-					}
-					currentClip.lastValue = currentValue;
-				}
-				else {
-					timeIsOverCurrentClip = isTimeOverClip;
-					if (onlyOverClip || currentClip.lastValue != currentValue) {
-						currentClip.target.SendMessage(fName,currentValue,SendMessageOptions.DontRequireReceiver);
-						if (currentClip.extraTargets.Length>0) {
-							foreach (var at in currentClip.extraTargets) {
-								if (!at) continue;
-								at.SendMessage(fName,currentValue,SendMessageOptions.DontRequireReceiver);
-							}
-						}
-					}
-					currentClip.lastValue = currentValue;
-					timeIsOverCurrentClip = false;
-				}
-			}
-			else if (currentClip.updateMode == CutsceneClipUpdateMode.DirectVarAccess) {
-				if (onlyOverClip || currentClip.lastValue != currentValue) {
-					if (!SetDirectVarValue(currentClip,currentClip.targetComponent,currentValue)) {
-						Debug.Log("Warning: Direct Variable Access failed in \""+currentClip.name+"\".");
-					}
-					
-					if (currentClip.extraTargets.Length>0) {
-						foreach (var at in currentClip.extraTargets) {
-							if (!at) continue;
-							SetDirectVarValue(currentClip,at,currentValue);
-						}
-					}
-				}
-				currentClip.lastValue = currentValue;
-			}
-		}
-		else if (!currentClip.ignoreTarget){
-			if (Application.isPlaying) {
-				Debug.Log("Warning: Tried to play CurveClip "+currentClip.name+" that has no target set.");
-			}
-		}
-	}
-	
-	if (!triggerEvents) return;
-	
-	EventClip[] theseEvents = GetCurrentEvents(time).ToArray<EventClip>();
-	//Events
-	
-	if (events.Length > 0) {
-		//theseEvents = GetCurrentEvents(time);
-		foreach (var e in theseEvents) {
-			if (e.target) {
-				//var eventMessage:String = "";
-				MethodInfo method = GetIndexedMethod(e.component,e.targetFunction,e.paramVariationIndex);
-				if (method!=null) {
-					if (e.component != null) {
-						Object[] params = new Object[e.params.length];
-						for (int epi = 0; epi < e.params.length; epi++) {
-							params[epi] = e.params[epi].GetValue();
-						}
-						method.Invoke(e.component,params);
-					}
-					else {
-						Debug.Log("Warning: Event component is null!");
-					}
-				}
-				else {
-					Debug.Log("Warning: Event method not found!");
-				}
-			}
-			else {
-				Debug.Log("Warning: Tried to play event "+e.name+" that has no target set.");
-			}
-			finishedEvents.Remove(e);
-			finishedEvents.Add(e);
-		}
-	}
-	
-}
+    public void UpdateCutscene(float time, bool triggerEvents, bool onlyOverClip)
+    {
+        List<CurveClip> currentClips = new List<CurveClip>();
+        float totalTime = GetTotalTime();
+        currentClips = curves.ToList<CurveClip>();
+
+        functionNames = new List<string>();
+        currentStaticClips = new List<CurveClip>();
+        currentValues = new List<float>();
+        timeIsOverClipValues = new List<bool>();
+
+        time = Mathf.Max(0, time);
+        time = Mathf.Min(totalTime, time);
+        if (time > totalTime)
+        {
+            Debug.Log("time > GetTotalTime()");
+        }
+        for (int i = 0; i < currentClips.Count; i++)
+        {
+            var currentClip = currentClips[i] as CurveClip;
+            if (currentClip == null) continue;
+
+            var isTimeOverClip = false;
+            if (time >= currentClip.startTime && time < currentClip.startTime + currentClip.length)
+            {
+                isTimeOverClip = true;
+            }
+
+            //if (time > GetTotalTime() && currentClip.startTime+currentClip.length == GetTotalTime()) {
+            //	isTimeOverClip = true;
+            //}
+
+            if (onlyOverClip && !isTimeOverClip) continue;
+
+            //if (Application.isPlaying) {
+            if (currentClip.activeCamera)
+            {
+                if (isTimeOverClip)
+                {
+                    SetOverrideCameraState(currentClip, true);
+                }
+                else
+                {
+                    SetOverrideCameraState(currentClip, false);
+                }
+            }
+            //}
+
+            var relativeClipTime = (time) - currentClip.startTime;
+            var currentValue = currentClip.GetValue(relativeClipTime);
+            //evalValue = value;
+
+            if (currentClip.target)
+            {
+                if (!isTimeOverClip)
+                {
+                    if (currentClip.activeCalculateOnly)
+                    {
+                        continue;
+                    }
+                }
+                //evalObjectScope = currentClip.target;
+                if (currentClip.updateMode == CutsceneClipUpdateMode.Disable)
+                {
+                    continue;
+                }
+                if (currentClip.updateMode == CutsceneClipUpdateMode.Action)
+                {
+                    if (currentClip.updateEvent == "No Valid Events Found")
+                    {
+                        continue;
+                    }
+
+                    if (currentClip.targetAction && isTimeOverClip)
+                    {
+                        currentClip.targetAction.OnTimeOverCurveClip(currentClip);
+                    }
+                    var fName = currentClip.updateEvent;
+                    if (!Application.isPlaying)
+                    {
+                        if (onlyOverClip || currentClip.lastValue != currentValue)
+                        {
+                            functionNames.Add(fName);
+                            currentStaticClips.Add(currentClip);
+                            currentValues.Add(currentValue);
+                            timeIsOverClipValues.Add(isTimeOverClip);
+                        }
+                        currentClip.lastValue = currentValue;
+                    }
+                    else
+                    {
+                        timeIsOverCurrentClip = isTimeOverClip;
+                        if (onlyOverClip || currentClip.lastValue != currentValue)
+                        {
+                            currentClip.target.SendMessage(fName, currentValue, SendMessageOptions.DontRequireReceiver);
+                            if (currentClip.extraTargets.Length > 0)
+                            {
+                                foreach (var at in currentClip.extraTargets)
+                                {
+                                    if (!at) continue;
+                                    at.SendMessage(fName, currentValue, SendMessageOptions.DontRequireReceiver);
+                                }
+                            }
+                        }
+                        currentClip.lastValue = currentValue;
+                        timeIsOverCurrentClip = false;
+                    }
+                }
+                else if (currentClip.updateMode == CutsceneClipUpdateMode.DirectVarAccess)
+                {
+                    if (onlyOverClip || currentClip.lastValue != currentValue)
+                    {
+                        if (!SetDirectVarValue(currentClip, currentClip.targetComponent, currentValue))
+                        {
+                            Debug.Log("Warning: Direct Variable Access failed in \"" + currentClip.name + "\".");
+                        }
+
+                        if (currentClip.extraTargets.Length > 0)
+                        {
+                            foreach (var at in currentClip.extraTargets)
+                            {
+                                if (!at) continue;
+                                SetDirectVarValue(currentClip, at, currentValue);
+                            }
+                        }
+                    }
+                    currentClip.lastValue = currentValue;
+                }
+            }
+            else if (!currentClip.ignoreTarget)
+            {
+                if (Application.isPlaying)
+                {
+                    Debug.Log("Warning: Tried to play CurveClip " + currentClip.name + " that has no target set.");
+                }
+            }
+        }
+
+        if (!triggerEvents) return;
+
+        EventClip[] theseEvents = GetCurrentEvents(time).ToArray<EventClip>();
+        //Events
+
+        if (events.Length > 0)
+        {
+            //theseEvents = GetCurrentEvents(time);
+            foreach (var e in theseEvents)
+            {
+                if (e.target)
+                {
+                    //var eventMessage:String = "";
+                    MethodInfo method = GetIndexedMethod(e.component, e.targetFunction, e.paramVariationIndex);
+                    if (method != null)
+                    {
+                        if (e.component != null)
+                        {
+                            System.Object[] param = new System.Object[e.param.Length];
+                            for (int epi = 0; epi < e.param.Length; epi++)
+                            {
+                                param[epi] = e.param[epi].GetValue();
+                            }
+                            method.Invoke(e.component, param);
+                        }
+                        else
+                        {
+                            Debug.Log("Warning: Event component is null!");
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("Warning: Event method not found!");
+                    }
+                }
+                else
+                {
+                    Debug.Log("Warning: Tried to play event " + e.name + " that has no target set.");
+                }
+                finishedEvents.Remove(e);
+                finishedEvents.Add(e);
+            }
+        }
+
+    }
 
     public bool SetDirectVarValue(CurveClip curveClip, System.Object baseObject, float newValue)
     {
@@ -588,7 +624,7 @@ public class Cutscene : MonoBehaviour
         startTime = Time.timeSinceLevelLoad;
         playing = true;
         playReverse = false;
-        finishedEvents = new List<Eventclip>();
+        finishedEvents = new List<EventClip>();
         finishedCutsceneEvents = new List<CutsceneEventClip>();
         totalPlays++;
     }
@@ -597,7 +633,7 @@ public class Cutscene : MonoBehaviour
     {
         playing = false;
         playReverse = false;
-        finishedEvents = new List<Eventclip>();
+        finishedEvents = new List<EventClip>();
         if (resetPlayCountOnStop)
         {
             totalPlays = 0;
@@ -681,7 +717,7 @@ public class Cutscene : MonoBehaviour
         }
         else
         {
-            for (i = 0; i < events.Length; i++)
+            for (int i = 0; i < events.Length; i++)
             {
                 if (time <= events[i].startTime)
                 {
